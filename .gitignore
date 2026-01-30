@@ -1,0 +1,17 @@
+# Build outputs
+build/
+out/
+
+# Kotlin 2.x Gradle data
+.kotlin/
+
+# IntelliJ IDEA project files
+.idea/
+*.iml
+
+# Logs and OS cruft
+*.log
+.DS_Store
+Thumbs.db
+
+.gradle/

@@ -1,0 +1,7 @@
+type: framework
+content:
+  - Chessboard
+  - Game loop
+  - Moving forward
+  - Capture
+  - Win conditions
