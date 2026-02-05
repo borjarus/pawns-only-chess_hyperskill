@@ -4,7 +4,11 @@ files:
     visible: true
     learner_created: false
   - name: test/PawnsOnlyChessTest.kt
+    visible: true
     learner_created: false
 feedback_link: https://hyperskill.org/projects/182/stages/922/implement#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: Congratulations!
+  time: "Thu, 05 Feb 2026 12:57:13 UTC"
 record: -1
