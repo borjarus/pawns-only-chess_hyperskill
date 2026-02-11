@@ -6,6 +6,525 @@ import org.hyperskill.hstest.testcase.CheckResult.wrong
 import org.hyperskill.hstest.testing.TestedProgram
 
 class PawnsOnlyChessTest : StageTest<Any>() {
+    // Tests added 11-Nov-21, Start
+    @DynamicTest
+    fun directCapture1(): CheckResult {
+        for (ch in 'a'..'g') {
+            val pawnsWhite = MutableList<Pair<Int, Int>>(8) { index -> Pair(1, index) }
+            val pawnsBlack = MutableList<Pair<Int, Int>>(8) { index -> Pair(6, index) }
+
+            val main = TestedProgram()
+            var outputString = main.start()
+
+            var currentPos = checkOutput(outputString.lowercase(), 0, "pawns-only chess")
+            if (currentPos == -1) return wrong("Program title \"Pawns-Only Chess\" is expected.")
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "first player's name:")
+            if (currentPos == -1) return wrong("Player 1 name prompt \"First Player's name:\" is expected.")
+
+            outputString = main.execute("John")
+            currentPos = checkOutput(outputString.lowercase(), 0, "second player's name:")
+            if (currentPos == -1) return wrong("Player 2 name prompt \"Second Player's name:\" is expected.")
+
+            outputString = main.execute("Amelia")
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+            if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+            pawnsWhite.apply {
+                remove(Pair(1, ch - 'h' + 7))
+                add(Pair(3, ch - 'h' + 7))
+            }
+
+            var move = "${ch}2${ch}4"
+            outputString = main.execute(move)
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+            if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+            pawnsBlack.apply {
+                remove(Pair(6, ch - 'h' + 8))
+                add(Pair(4, ch - 'h' + 8))
+            }
+
+            move = "${ch + 1}7${ch + 1}5"
+            outputString = main.execute(move)
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+            if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+            pawnsWhite.apply {
+                remove(Pair(3, ch - 'h' + 7))
+                add(Pair(4, ch - 'h' + 8))
+            }
+            pawnsBlack.remove(Pair(4, ch - 'h' + 8))
+
+            move = "${ch}4${ch + 1}5"
+            outputString = main.execute(move)
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+            if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+            outputString = main.execute("exit")
+            currentPos = checkOutput(outputString.lowercase(), 0, "bye!")
+            if (currentPos == -1) return wrong("Exit message \"Bye!\" is expected.")
+
+            if (outputString.lastIndex >= currentPos && outputString.substring(currentPos).isNotBlank())
+                return wrong("Unexpected output after exit message \"Bye!\".")
+
+            if (!main.isFinished) return wrong("The application didn't exit.")
+        }
+
+        return correct()
+    }
+
+    @DynamicTest
+    fun directCapture2(): CheckResult {
+        for (ch in 'b'..'h') {
+            val pawnsWhite = MutableList<Pair<Int, Int>>(8) { index -> Pair(1, index) }
+            val pawnsBlack = MutableList<Pair<Int, Int>>(8) { index -> Pair(6, index) }
+
+            val main = TestedProgram()
+            var outputString = main.start()
+
+            var currentPos = checkOutput(outputString.lowercase(), 0, "pawns-only chess")
+            if (currentPos == -1) return wrong("Program title \"Pawns-Only Chess\" is expected.")
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "first player's name:")
+            if (currentPos == -1) return wrong("Player 1 name prompt \"First Player's name:\" is expected.")
+
+            outputString = main.execute("John")
+            currentPos = checkOutput(outputString.lowercase(), 0, "second player's name:")
+            if (currentPos == -1) return wrong("Player 2 name prompt \"Second Player's name:\" is expected.")
+
+            outputString = main.execute("Amelia")
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+            if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+            pawnsWhite.apply {
+                remove(Pair(1, ch - 'h' + 7))
+                add(Pair(3, ch - 'h' + 7))
+            }
+
+            var move = "${ch}2${ch}4"
+            outputString = main.execute(move)
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+            if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+            pawnsBlack.apply {
+                remove(Pair(6, ch - 'h' + 6))
+                add(Pair(4, ch - 'h' + 6))
+            }
+
+            move = "${ch - 1}7${ch - 1}5"
+            outputString = main.execute(move)
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+            if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+            pawnsWhite.apply {
+                remove(Pair(3, ch - 'h' + 7))
+                add(Pair(4, ch - 'h' + 6))
+            }
+            pawnsBlack.remove(Pair(4, ch - 'h' + 6))
+
+            move = "${ch}4${ch - 1}5"
+            outputString = main.execute(move)
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+            if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+            outputString = main.execute("exit")
+            currentPos = checkOutput(outputString.lowercase(), 0, "bye!")
+            if (currentPos == -1) return wrong("Exit message \"Bye!\" is expected.")
+
+            if (outputString.lastIndex >= currentPos && outputString.substring(currentPos).isNotBlank())
+                return wrong("Unexpected output after exit message \"Bye!\".")
+
+            if (!main.isFinished) return wrong("The application didn't exit.")
+        }
+
+        return correct()
+    }
+
+    @DynamicTest
+    fun directCapture3(): CheckResult {
+        for (ch in 'a'..'g') {
+            val pawnsWhite = MutableList<Pair<Int, Int>>(8) { index -> Pair(1, index) }
+            val pawnsBlack = MutableList<Pair<Int, Int>>(8) { index -> Pair(6, index) }
+
+            val main = TestedProgram()
+            var outputString = main.start()
+
+            var currentPos = checkOutput(outputString.lowercase(), 0, "pawns-only chess")
+            if (currentPos == -1) return wrong("Program title \"Pawns-Only Chess\" is expected.")
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "first player's name:")
+            if (currentPos == -1) return wrong("Player 1 name prompt \"First Player's name:\" is expected.")
+
+            outputString = main.execute("John")
+            currentPos = checkOutput(outputString.lowercase(), 0, "second player's name:")
+            if (currentPos == -1) return wrong("Player 2 name prompt \"Second Player's name:\" is expected.")
+
+            outputString = main.execute("Amelia")
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+            if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+            pawnsWhite.apply {
+                remove(Pair(1, ch - 'h' + 7))
+                add(Pair(2, ch - 'h' + 7))
+            }
+
+            var move = "${ch}2${ch}3"
+            outputString = main.execute(move)
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+            if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+            pawnsBlack.apply {
+                remove(Pair(6, ch - 'h' + 8))
+                add(Pair(4, ch - 'h' + 8))
+            }
+
+            move = "${ch + 1}7${ch + 1}5"
+            outputString = main.execute(move)
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+            if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+            pawnsWhite.apply {
+                remove(Pair(2, ch - 'h' + 7))
+                add(Pair(3, ch - 'h' + 7))
+            }
+
+            move = "${ch}3${ch}4"
+            outputString = main.execute(move)
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+            if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+            pawnsBlack.apply {
+                remove(Pair(4, ch - 'h' + 8))
+                add(Pair(3, ch - 'h' + 7))
+            }
+            pawnsWhite.remove(Pair(3, ch - 'h' + 7))
+
+            move = "${ch + 1}5${ch}4"
+            outputString = main.execute(move)
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+            if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+            outputString = main.execute("exit")
+            currentPos = checkOutput(outputString.lowercase(), 0, "bye!")
+            if (currentPos == -1) return wrong("Exit message \"Bye!\" is expected.")
+
+            if (outputString.lastIndex >= currentPos && outputString.substring(currentPos).isNotBlank())
+                return wrong("Unexpected output after exit message \"Bye!\".")
+
+            if (!main.isFinished) return wrong("The application didn't exit.")
+        }
+
+        return correct()
+    }
+
+    @DynamicTest
+    fun directCapture4(): CheckResult {
+        for (ch in 'b'..'h') {
+            val pawnsWhite = MutableList<Pair<Int, Int>>(8) { index -> Pair(1, index) }
+            val pawnsBlack = MutableList<Pair<Int, Int>>(8) { index -> Pair(6, index) }
+
+            val main = TestedProgram()
+            var outputString = main.start()
+
+            var currentPos = checkOutput(outputString.lowercase(), 0, "pawns-only chess")
+            if (currentPos == -1) return wrong("Program title \"Pawns-Only Chess\" is expected.")
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "first player's name:")
+            if (currentPos == -1) return wrong("Player 1 name prompt \"First Player's name:\" is expected.")
+
+            outputString = main.execute("John")
+            currentPos = checkOutput(outputString.lowercase(), 0, "second player's name:")
+            if (currentPos == -1) return wrong("Player 2 name prompt \"Second Player's name:\" is expected.")
+
+            outputString = main.execute("Amelia")
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+            if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+            pawnsWhite.apply {
+                remove(Pair(1, ch - 'h' + 7))
+                add(Pair(2, ch - 'h' + 7))
+            }
+
+            var move = "${ch}2${ch}3"
+            outputString = main.execute(move)
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+            if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+            pawnsBlack.apply {
+                remove(Pair(6, ch - 'h' + 6))
+                add(Pair(4, ch - 'h' + 6))
+            }
+
+            move = "${ch - 1}7${ch - 1}5"
+            outputString = main.execute(move)
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+            if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+            pawnsWhite.apply {
+                remove(Pair(2, ch - 'h' + 7))
+                add(Pair(3, ch - 'h' + 7))
+            }
+
+            move = "${ch}3${ch}4"
+            outputString = main.execute(move)
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+            if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+            pawnsBlack.apply {
+                remove(Pair(4, ch - 'h' + 6))
+                add(Pair(3, ch - 'h' + 7))
+            }
+            pawnsWhite.remove(Pair(3, ch - 'h' + 7))
+
+            move = "${ch - 1}5${ch}4"
+            outputString = main.execute(move)
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+            if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+            outputString = main.execute("exit")
+            currentPos = checkOutput(outputString.lowercase(), 0, "bye!")
+            if (currentPos == -1) return wrong("Exit message \"Bye!\" is expected.")
+
+            if (outputString.lastIndex >= currentPos && outputString.substring(currentPos).isNotBlank())
+                return wrong("Unexpected output after exit message \"Bye!\".")
+
+            if (!main.isFinished) return wrong("The application didn't exit.")
+        }
+
+        return correct()
+    }
+
+    // Tests added 11-Nov-21, End
+    @DynamicTest
+    fun testAdd4(): CheckResult {
+        for (ch in listOf('a', 'c', 'e')) {
+            val chList = ('a'..'h').filter { it - ch > 1 }
+            for (ch2 in chList) {
+
+                val pawnsWhite = MutableList<Pair<Int, Int>>(8) { index -> Pair(1, index) }
+                val pawnsBlack = MutableList<Pair<Int, Int>>(8) { index -> Pair(6, index) }
+
+                val main = TestedProgram()
+                var outputString = main.start()
+
+                var currentPos = checkOutput(outputString.lowercase(), 0, "pawns-only chess")
+                if (currentPos == -1) return wrong("Program title \"Pawns-Only Chess\" is expected.")
+                currentPos = checkOutput(outputString.lowercase(), currentPos, "first player's name:")
+                if (currentPos == -1) return wrong("Player 1 name prompt \"First Player's name:\" is expected.")
+
+                outputString = main.execute("John")
+                currentPos = checkOutput(outputString.lowercase(), 0, "second player's name:")
+                if (currentPos == -1) return wrong("Player 2 name prompt \"Second Player's name:\" is expected.")
+
+                outputString = main.execute("Amelia")
+                currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack).let { result ->
+                    if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+                }
+                currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+                if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+                pawnsWhite.apply {
+                    remove(Pair(1, ch - 'h' + 7))
+                    add(Pair(3, ch - 'h' + 7))
+                }
+
+                var move = "${ch}2${ch}4"
+                outputString = main.execute(move)
+                currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                    if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+                }
+                currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+                if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+                pawnsBlack.apply {
+                    remove(Pair(6, 0))
+                    add(Pair(5, 0))
+                }
+
+                move = "a7a6"
+                outputString = main.execute(move)
+                currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                    if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+                }
+                currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+                if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+                pawnsWhite.apply {
+                    remove(Pair(3, ch - 'h' + 7))
+                    add(Pair(4, ch - 'h' + 7))
+                }
+
+                move = "${ch}4${ch}5"
+                outputString = main.execute(move)
+                currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                    if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+                }
+                currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+                if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+                pawnsBlack.apply {
+                    remove(Pair(6, ch2 - 'h' + 7))
+                    add(Pair(4, ch2 - 'h' + 7))
+                }
+
+                move = "${ch2}7${ch2}5"
+                outputString = main.execute(move)
+                currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                    if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+                }
+                currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+                if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+                move = "${ch}5${ch2}6"
+                outputString = main.execute(move)
+                currentPos = checkOutput(outputString.lowercase(), 0, "invalid input", "john's turn:")
+                if (currentPos == -1) return wrong("Incorrect output after an invalid move \"$move\".")
+
+                move = "${ch}5${ch + 1}6"
+                outputString = main.execute(move)
+                currentPos = checkOutput(outputString.lowercase(), 0, "invalid input", "john's turn:")
+                if (currentPos == -1) return wrong("Incorrect output after an invalid move \"$move\".")
+
+                outputString = main.execute("exit")
+                currentPos = checkOutput(outputString.lowercase(), 0, "bye!")
+                if (currentPos == -1) return wrong("Exit message \"Bye!\" is expected.")
+
+                if (outputString.lastIndex >= currentPos && outputString.substring(currentPos).isNotBlank())
+                    return wrong("Unexpected output after exit message \"Bye!\".")
+
+                if (!main.isFinished) return wrong("The application didn't exit.")
+            }
+        }
+
+        return correct()
+    }
+
+    @DynamicTest
+    fun testAdd3(): CheckResult {
+        val pawnsWhite = MutableList<Pair<Int, Int>>(8) { index -> Pair(1, index) }
+        val pawnsBlack = MutableList<Pair<Int, Int>>(8) { index -> Pair(6, index) }
+
+        val main = TestedProgram()
+        var outputString = main.start()
+
+        var currentPos = checkOutput(outputString.lowercase(), 0, "pawns-only chess")
+        if (currentPos == -1) return wrong("Program title \"Pawns-Only Chess\" is expected.")
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "first player's name:")
+        if (currentPos == -1) return wrong("Player 1 name prompt \"First Player's name:\" is expected.")
+
+        outputString = main.execute("John")
+        currentPos = checkOutput(outputString.lowercase(), 0, "second player's name:")
+        if (currentPos == -1) return wrong("Player 2 name prompt \"Second Player's name:\" is expected.")
+
+        outputString = main.execute("Amelia")
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+        if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+        var move = ""
+        for (ch in 'a'..'h') {
+            pawnsWhite.apply {
+                remove(Pair(1, ch - 'h' + 7))
+                add(Pair(3, ch - 'h' + 7))
+            }
+
+            move = "${ch}2${ch}4"
+            outputString = main.execute(move)
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+            if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+            pawnsBlack.apply {
+                remove(Pair(6, ch - 'h' + 7))
+                add(Pair(4, ch - 'h' + 7))
+            }
+
+            move = "${ch}7${ch}5"
+            outputString = main.execute(move)
+            currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+                if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+            }
+            currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+            if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+        }
+
+        for (ch in listOf('a', 'e', 'h')) {
+            val chList = ('a'..'h').filter { kotlin.math.abs(it - ch) > 1 }
+            for (ch2 in chList) {
+                move = "${ch}4${ch2}5"
+                outputString = main.execute(move)
+                currentPos = checkOutput(outputString.lowercase(), 0, "invalid input", "john's turn:")
+                if (currentPos == -1) return wrong("Incorrect output after an invalid move \"$move\".")
+            }
+        }
+
+        outputString = main.execute("exit")
+        currentPos = checkOutput(outputString.lowercase(), 0, "bye!")
+        if (currentPos == -1) return wrong("Exit message \"Bye!\" is expected.")
+
+        if (outputString.lastIndex >= currentPos && outputString.substring(currentPos).isNotBlank())
+            return wrong("Unexpected output after exit message \"Bye!\".")
+
+        if (!main.isFinished) return wrong("The application didn't exit.")
+
+        return correct()
+    }
+
     @DynamicTest
     fun testAdd2(): CheckResult {
         val pawnsWhite = MutableList<Pair<Int, Int>>(8) { index -> Pair(1, index) }
@@ -369,7 +888,6 @@ class PawnsOnlyChessTest : StageTest<Any>() {
         return correct()
     }
 
-
     @DynamicTest
     fun test1(): CheckResult {
         val pawnsWhite = MutableList<Pair<Int, Int>>(8) { index -> Pair(1, index) }
@@ -462,7 +980,6 @@ class PawnsOnlyChessTest : StageTest<Any>() {
     fun test2(): CheckResult {
         val pawnsWhite = MutableList<Pair<Int, Int>>(8) { index -> Pair(1, index) }
         val pawnsBlack = MutableList<Pair<Int, Int>>(8) { index -> Pair(6, index) }
-
         val main = TestedProgram()
         var outputString = main.start()
 
@@ -540,7 +1057,7 @@ class PawnsOnlyChessTest : StageTest<Any>() {
 
         move = "e7e6"
         outputString = main.execute(move)
-        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack).let { result ->
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
             if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
         }
         currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
@@ -568,6 +1085,344 @@ class PawnsOnlyChessTest : StageTest<Any>() {
         outputString = main.execute(move)
         currentPos = checkOutput(outputString.lowercase(), 0, "invalid input", "amelia's turn:")
         if (currentPos == -1) return wrong("Incorrect output after an invalid move \"$move\".")
+
+
+        outputString = main.execute("exit")
+        currentPos = checkOutput(outputString.lowercase(), 0, "bye!")
+        if (currentPos == -1) return wrong("Exit message \"Bye!\" is expected.")
+
+        if (outputString.lastIndex >= currentPos && outputString.substring(currentPos).isNotBlank())
+            return wrong("Unexpected output after exit message \"Bye!\".")
+
+        if (!main.isFinished) return wrong("The application didn't exit.")
+
+        return correct()
+    }
+
+    @DynamicTest
+    fun test3(): CheckResult {
+        val pawnsWhite = MutableList<Pair<Int, Int>>(8) { index -> Pair(1, index) }
+        val pawnsBlack = MutableList<Pair<Int, Int>>(8) { index -> Pair(6, index) }
+
+        val main = TestedProgram()
+        var outputString = main.start()
+
+        var currentPos = checkOutput(outputString.lowercase(), 0, "pawns-only chess")
+        if (currentPos == -1) return wrong("Program title \"Pawns-Only Chess\" is expected.")
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "first player's name:")
+        if (currentPos == -1) return wrong("Player 1 name prompt \"First Player's name:\" is expected.")
+
+        outputString = main.execute("John")
+        currentPos = checkOutput(outputString.lowercase(), 0, "second player's name:")
+        if (currentPos == -1) return wrong("Player 2 name prompt \"Second Player's name:\" is expected.")
+
+        outputString = main.execute("Amelia")
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+        if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+        pawnsWhite.apply {
+            remove(Pair(1, 4))
+            add(Pair(3, 4))
+        }
+
+        var move = "e2e4"
+        outputString = main.execute(move)
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+        if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+        pawnsBlack.apply {
+            remove(Pair(6, 3))
+            add(Pair(4, 3))
+        }
+
+        move = "d7d5"
+        outputString = main.execute(move)
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+        if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+        pawnsWhite.apply {
+            remove(Pair(3, 4))
+            add(Pair(4, 3))
+        }
+        pawnsBlack.remove(Pair(4, 3))
+
+        move = "e4d5"
+        outputString = main.execute(move)
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+        if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+        pawnsBlack.apply {
+            remove(Pair(6, 2))
+            add(Pair(5, 2))
+        }
+
+        move = "c7c6"
+        outputString = main.execute(move)
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+        if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+        pawnsWhite.apply {
+            remove(Pair(1, 0))
+            add(Pair(3, 0))
+        }
+
+        move = "a2a4"
+        outputString = main.execute(move)
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+        if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+        pawnsBlack.apply {
+            remove(Pair(5, 2))
+            add(Pair(4, 3))
+        }
+        pawnsWhite.remove(Pair(4, 3))
+
+        move = "c6d5"
+        outputString = main.execute(move)
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+        if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+        outputString = main.execute("exit")
+        currentPos = checkOutput(outputString.lowercase(), 0, "bye!")
+        if (currentPos == -1) return wrong("Exit message \"Bye!\" is expected.")
+
+        if (outputString.lastIndex >= currentPos && outputString.substring(currentPos).isNotBlank())
+            return wrong("Unexpected output after exit message \"Bye!\".")
+
+        if (!main.isFinished) return wrong("The application didn't exit.")
+
+        return correct()
+    }
+
+    @DynamicTest
+    fun test4(): CheckResult {
+        val pawnsWhite = MutableList<Pair<Int, Int>>(8) { index -> Pair(1, index) }
+        val pawnsBlack = MutableList<Pair<Int, Int>>(8) { index -> Pair(6, index) }
+
+        val main = TestedProgram()
+        var outputString = main.start()
+
+        var currentPos = checkOutput(outputString.lowercase(), 0, "pawns-only chess")
+        if (currentPos == -1) return wrong("Program title \"Pawns-Only Chess\" is expected.")
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "first player's name:")
+        if (currentPos == -1) return wrong("Player 1 name prompt \"First Player's name:\" is expected.")
+
+        outputString = main.execute("John")
+        currentPos = checkOutput(outputString.lowercase(), 0, "second player's name:")
+        if (currentPos == -1) return wrong("Player 2 name prompt \"Second Player's name:\" is expected.")
+
+        outputString = main.execute("Amelia")
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+        if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+        pawnsWhite.apply {
+            remove(Pair(1, 4))
+            add(Pair(3, 4))
+        }
+
+        var move = "e2e4"
+        outputString = main.execute(move)
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+        if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+        pawnsBlack.apply {
+            remove(Pair(6, 0))
+            add(Pair(5, 0))
+        }
+
+        move = "a7a6"
+        outputString = main.execute(move)
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+        if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+        pawnsWhite.apply {
+            remove(Pair(3, 4))
+            add(Pair(4, 4))
+        }
+
+        move = "e4e5"
+        outputString = main.execute(move)
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+        if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+        pawnsBlack.apply {
+            remove(Pair(6, 3))
+            add(Pair(4, 3))
+        }
+
+        move = "d7d5"
+        outputString = main.execute(move)
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+        if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+        pawnsWhite.apply {
+            remove(Pair(4, 4))
+            add(Pair(5, 3))
+        }
+        pawnsBlack.remove(Pair(4, 3))
+
+        move = "e5d6"
+        outputString = main.execute(move)
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+        if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+        outputString = main.execute("exit")
+        currentPos = checkOutput(outputString.lowercase(), 0, "bye!")
+        if (currentPos == -1) return wrong("Exit message \"Bye!\" is expected.")
+
+        if (outputString.lastIndex >= currentPos && outputString.substring(currentPos).isNotBlank())
+            return wrong("Unexpected output after exit message \"Bye!\".")
+
+        if (!main.isFinished) return wrong("The application didn't exit.")
+
+        return correct()
+    }
+
+    @DynamicTest
+    fun test5(): CheckResult {
+        val pawnsWhite = MutableList<Pair<Int, Int>>(8) { index -> Pair(1, index) }
+        val pawnsBlack = MutableList<Pair<Int, Int>>(8) { index -> Pair(6, index) }
+
+        val main = TestedProgram()
+        var outputString = main.start()
+
+        var currentPos = checkOutput(outputString.lowercase(), 0, "pawns-only chess")
+        if (currentPos == -1) return wrong("Program title \"Pawns-Only Chess\" is expected.")
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "first player's name:")
+        if (currentPos == -1) return wrong("Player 1 name prompt \"First Player's name:\" is expected.")
+
+        outputString = main.execute("John")
+        currentPos = checkOutput(outputString.lowercase(), 0, "second player's name:")
+        if (currentPos == -1) return wrong("Player 2 name prompt \"Second Player's name:\" is expected.")
+
+        outputString = main.execute("Amelia")
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+        if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+        pawnsWhite.apply {
+            remove(Pair(1, 4))
+            add(Pair(3, 4))
+        }
+
+        var move = "e2e4"
+        outputString = main.execute(move)
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+        if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+        pawnsBlack.apply {
+            remove(Pair(6, 0))
+            add(Pair(5, 0))
+        }
+
+        move = "a7a6"
+        outputString = main.execute(move)
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+        if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+        pawnsWhite.apply {
+            remove(Pair(3, 4))
+            pawnsWhite.add(Pair(4, 4))
+        }
+
+        move = "e4e5"
+        outputString = main.execute(move)
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+        if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+        pawnsBlack.apply {
+            remove(Pair(6, 3))
+            add(Pair(4, 3))
+        }
+
+        move = "d7d5"
+        outputString = main.execute(move)
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+        if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+        pawnsWhite.apply {
+            remove(Pair(1, 7))
+            add(Pair(2, 7))
+        }
+
+        move = "h2h3"
+        outputString = main.execute(move)
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "amelia's turn:")
+        if (currentPos == -1) return wrong("Player 2 prompt to play \"Amelia's turn:\" is expected.")
+
+        pawnsBlack.apply {
+            remove(Pair(6, 7))
+            add(Pair(5, 7))
+        }
+
+        move = "h7h6"
+        outputString = main.execute(move)
+        currentPos = parseChessboard(outputString, 0, pawnsWhite, pawnsBlack, move).let { result ->
+            if (result.isIncorrect) return wrong(result.errorMsg) else result.searchPosition
+        }
+        currentPos = checkOutput(outputString.lowercase(), currentPos, "john's turn:")
+        if (currentPos == -1) return wrong("Player 1 prompt to play \"John's turn:\" is expected.")
+
+        move = "e5d6"
+        outputString = main.execute(move)
+        currentPos = checkOutput(outputString.lowercase(), 0, "invalid input", "john's turn:")
+        if (currentPos == -1) return wrong("Incorrect output after an invalid en passant capture.")
 
         outputString = main.execute("exit")
         currentPos = checkOutput(outputString.lowercase(), 0, "bye!")

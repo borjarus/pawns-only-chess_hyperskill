@@ -15,7 +15,7 @@ fun promptForInput(s: String):String {
 fun createInitialBoard(): MutableList<MutableList<String>> =
     MutableList(8) { row ->
         MutableList(8) { col ->
-            when(row){
+            when (row) {
                 1 -> " B "
                 6 -> " W "
                 else -> "   "
