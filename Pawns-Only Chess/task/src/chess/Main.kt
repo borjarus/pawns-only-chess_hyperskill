@@ -5,8 +5,10 @@ enum class PlayerColor(val symbol: String) {
     Black(" B ");
 }
 
-fun promptForInput(promt: String):String {
-    println(promt)
+data class Move(val from: String, val to: String, val color: PlayerColor)
+
+fun promptForInput(s: String):String {
+    println(s)
     return readln()
 }
 
@@ -42,12 +44,80 @@ fun notationToIndices(pos: String): Pair<Int, Int> {
     return Pair(row, col)
 }
 
+fun isValidCapture(
+    board: List<List<String>>,
+    sRow: Int, sCol: Int,
+    eRow:Int, eCol: Int,
+    playerColor: PlayerColor
+): Boolean {
+    val dest = board[eRow][eCol]
+    val opponentSymbol = if (playerColor == PlayerColor.White) PlayerColor.Black.symbol else PlayerColor.White.symbol
+
+    // Destination must have opponent's pawn
+    if (dest != opponentSymbol) {
+        return false
+    }
+
+    // Must be diagonal (one column difference)
+    if (kotlin.math.abs(sCol - eCol) != 1){
+        return false
+    }
+
+    // Must be one row forward in correct direction
+    return when (playerColor) {
+        PlayerColor.White -> sRow - eRow == 1 // white moves up
+        PlayerColor.Black -> eCol - sCol == 1 // black moves down
+    }
+}
+
+fun isValidEnPassant(
+    board: List<List<String>>,
+    sRow: Int, sCol: Int,
+    eRow:Int, eCol: Int,
+    playerColor: PlayerColor,
+    lastMove: Move?
+): Boolean {
+    // No last move means no en passant
+    if (lastMove == null) return false
+
+    val (lastFromRow, lastFromCol) = notationToIndices(lastMove.from)
+    val (lastToRow, lastToCol) = notationToIndices(lastMove.to)
+
+    // Last move must be opponent's pawn moving 2 squares
+    val opponentColor = if (playerColor == PlayerColor.White) PlayerColor.Black else PlayerColor.White
+    if (lastMove.color != opponentColor) return false
+    if (kotlin.math.abs(lastFromRow - lastToRow) != 2) return false
+
+    when (playerColor) {
+        PlayerColor.White -> {
+            // White pawn must be on rank 5 (row index 3)
+            if (sRow != 3) return false
+            // Opponent pawn must be adjacent on same rank
+            if (lastToRow != 3) return false
+            if (kotlin.math.abs(sCol - lastToCol) != 1) return false
+            // Destination must be diagonal forward (rank 6, row index 2)
+            if (eRow != 2 || eCol != lastToCol) return false
+        }
+        PlayerColor.Black -> {
+            // Black pawn must be on rank 4 (row index 4)
+            if (sRow != 4) return false
+            // Opponent pawn must be adjacent on same rank
+            if (lastToRow != 4) return false
+            if (kotlin.math.abs(sCol - lastToCol) != 1) return false
+            // Destination must be diagonal forward (rank 3, row index 5)
+            if (eRow != 5 || eCol != lastToCol) return false
+        }
+    }
+    return true
+}
+
 fun isValidMove(
     board: List<List<String>>,
     start: String,
     end: String,
     playerColor: PlayerColor,
     movedBefore: MutableSet<String>,
+    lastMove: Move?
 ): Boolean {
     val (sRow, sCol) = notationToIndices(start)
     val (eRow, eCol) = notationToIndices(end)
@@ -59,14 +129,26 @@ fun isValidMove(
 
     // Check player pawn at start
     if (pawn != playerColor.symbol) return false
+
+    // Check if it's a capture move
+    if (dest != "   " || kotlin.math.abs(sCol - eCol) == 1) {
+        // Regular diagonal capture
+        if (isValidCapture(board, sRow, sCol, eRow, eCol, playerColor)) {
+            return true
+        }
+        // En passant capture
+        if (isValidEnPassant(board, sRow, sCol, eRow, eCol, playerColor, lastMove)) {
+            return true
+        }
+        return false
+    }
+    // Forward move (non-capture) - destination must be empty and same column
     if (dest != "   ") return false
+    if (sCol != eCol) return false
 
     // Forward move conditions
     return when (playerColor) {
         PlayerColor.White -> {
-            // white moves up the board so row decreases
-            if (sCol != eCol) return false // only forward in same column allowed
-
             val distance = sRow - eRow
             when (distance) {
                 1 -> true
@@ -80,9 +162,6 @@ fun isValidMove(
             }
         }
         PlayerColor.Black -> {
-            // black moves down the board so row increases
-            if (sCol != eCol) return false // only forward in same column allowed
-
             val distance = eRow - sRow
             when (distance) {
                 1 -> true
@@ -102,12 +181,23 @@ fun updateBoard(
     start: String,
     end: String,
     movedBefore: MutableSet<String>,
+    lastMove: Move?
 ) {
     val (sRow, sCol) = notationToIndices(start)
     val (eRow, eCol) = notationToIndices(end)
 
+    // Check if this is en passant capture
+    val isEnPassant = kotlin.math.abs(sCol - eCol) == 1 &&
+            board[eRow][eCol] != "   " &&
+            lastMove != null
+
     board[eRow][eCol] = board[sRow][sCol]
     board[sRow][sCol] = "   "
+
+    // Remove captured pawn (for en passant, it's on the same rank as starting position)
+    if (isEnPassant) {
+        board[sRow][eCol] = "   "
+    }
 
     // mark the pawn has moved from this new square
     movedBefore.add(end)
@@ -119,6 +209,7 @@ fun gameLoop(firstPlayer: String, secondPlayer: String ) {
     val movedBefore = mutableSetOf<String>()
     var currentPlayer = firstPlayer
     var currentColor = PlayerColor.White
+    var lastMove: Move? = null
 
     while (true){
         println("$currentPlayer's turn:")
@@ -143,13 +234,16 @@ fun gameLoop(firstPlayer: String, secondPlayer: String ) {
             continue
         }
 
-        if (!isValidMove(board, start, end, currentColor, movedBefore)) {
+        if (!isValidMove(board, start, end, currentColor, movedBefore, lastMove)) {
             println("Invalid Input")
             continue
         }
 
+        // Store this move as last move
+        lastMove = Move(start, end, currentColor)
+
         // Move the pawn
-        updateBoard(board, start, end, movedBefore)
+        updateBoard(board, start, end, movedBefore, lastMove)
 
         // Print updated board
         println(renderBoard(board))
@@ -166,11 +260,6 @@ fun gameLoop(firstPlayer: String, secondPlayer: String ) {
 }
 
 
-fun printBoard(){
-    val renderedBoard = renderBoard(createInitialBoard())
-    println(renderedBoard)
-}
-
 fun main() {
     println("Pawns-Only Chess")
 
@@ -185,3 +274,5 @@ fun main() {
     // Start game loop
     gameLoop(firstPlayer, secondPlayer)
 }
+
+
